@@ -20,7 +20,7 @@ baseUrl = "https://cats.airports.faa.gov/Reports/reports.cfm"
 
 pitAirportId = 2179
 
-for currentYear in range(startYear, endYear):
+for currentYear in range(startYear, endYear + 1):
     getRequestUrl = "https://cats.airports.faa.gov/Reports/reports.cfm?AirportID={}&Year={}".format(pitAirportId, currentYear)
 
     print("Getting \"{}\"".format(getRequestUrl))
