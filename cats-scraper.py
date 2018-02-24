@@ -42,8 +42,7 @@ def sanitizeLines(caughtLines):
     return sanitizedLine
 
 
-def processLines(lines, year):
-    target = "16.5"
+def processLines(lines, year, target):
     linesToGrab = 5
     
     caughtLines = catchLines(lines, target, linesToGrab)
@@ -77,6 +76,6 @@ for currentYear in range(config.StartYear, config.EndYear + 1):
     r = session.post(postRequestUrl, headers=headers, data=payload)
 
     if r.status_code == requests.codes.ok:
-        processLines(r.text, currentYear)
+        processLines(r.text, currentYear, config.Section)
     else:
         print("Status code \"{}\"!".format(r.status_code))
