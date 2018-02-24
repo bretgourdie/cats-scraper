@@ -19,11 +19,22 @@ endYear = 2017
 pitAirportId = 2179
 
 for currentYear in range(startYear, endYear + 1):
-    getRequestUrl = "https://cats.airports.faa.gov/Reports/reports.cfm?AirportID={}&Year={}".format(pitAirportId, currentYear)
+    postRequestUrl = "https://cats.airports.faa.gov/Reports/rpt127.cfm"
+    headers = {"User-Agent": "Mozilla/5.0"}
+    payload = {
+        "AirportName": str(pitAirportId),
+        "AirportId": str(pitAirportId),
+        "State": "0",
+        "RegionId": "0",
+        "Year": str(currentYear),
+        "view": "Screen",
+        "YearToCompare": "0"
+    }
 
-    print("Getting \"{}\"".format(getRequestUrl))
+    print("Posting \"{}\"".format(postRequestUrl))
 
-    r = requests.post(getRequestUrl)
+    session = requests.Session()
+    r = session.post(postRequestUrl, headers=headers, data=payload)
 
     if r.status_code == requests.codes.ok:
         processLines(r.text, currentYear)
