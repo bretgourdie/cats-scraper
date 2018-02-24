@@ -11,6 +11,7 @@ class CatsConfig:
         targetSection = config[section]
 
         self.Section = targetSection["Section"]
+        self.LinesToGrab = targetSection["LinesToGrab"]
         self.ReportUrl = targetSection["ReportUrl"]
         self.StartYear = int(targetSection["StartYear"])
         self.EndYear = int(targetSection["EndYear"])
