@@ -23,7 +23,10 @@ def sanitizeLines(caughtLines):
     textToStrip = [
         "<td valign=\"top\" class=\"rpt127\">",
         "</td>",
-        "<td valign=\"top\" class=\"rpt127r\">"
+        "<td valign=\"top\" class=\"rpt127r\">",
+        "</tr>",
+        "<tr>",
+        "&nbsp;"
     ]
 
     sanitizedLine = ""
