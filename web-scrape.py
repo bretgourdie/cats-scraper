@@ -13,11 +13,9 @@ def processLines(lines, year):
     if not foundTarget:
         print("{}: Did not find {}".format(year, target))
 
+baseUrl = "https://cats.airports.faa.gov/Reports/reports.cfm"
 startYear = 2009
 endYear = 2017
-
-baseUrl = "https://cats.airports.faa.gov/Reports/reports.cfm"
-
 pitAirportId = 2179
 
 for currentYear in range(startYear, endYear + 1):
