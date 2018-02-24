@@ -1,4 +1,5 @@
 import requests
+from CatsConfig import CatsConfig
 
 def catchLines(lines, target, linesToGrab):
     splitLines = lines.splitlines()
@@ -52,24 +53,21 @@ def processLines(lines, year):
     else:
         print("{}: Did not find {}".format(year, target))
 
+config = CatsConfig()
 
-baseUrl = "https://cats.airports.faa.gov/Reports/reports.cfm"
-startYear = 2009
-endYear = 2017
-pitAirportId = 2179
 debug = False
 
-for currentYear in range(startYear, endYear + 1):
+for currentYear in range(config.StartYear, config.EndYear + 1):
     postRequestUrl = "https://cats.airports.faa.gov/Reports/rpt127.cfm"
     headers = {"User-Agent": "Mozilla/5.0"}
     payload = {
-        "AirportName": str(pitAirportId),
-        "AirportId": str(pitAirportId),
-        "State": "0",
-        "RegionId": "0",
+        "AirportName": str(config.AirportId),
+        "AirportId": str(config.AirportId),
+        "State": str(config.State),
+        "RegionId": str(config.RegionId),
         "Year": str(currentYear),
-        "view": "Screen",
-        "YearToCompare": "0"
+        "view": config.view,
+        "YearToCompare": str(config.YearToCompare)
     }
 
     if debug:
