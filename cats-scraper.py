@@ -1,58 +1,16 @@
 import requests
+import csv
 from CatsConfig import CatsConfig
 
-def catchLines(lines, target, linesToGrab):
-    splitLines = lines.splitlines()
-    foundTarget = False
-    caughtLines = []
+def processResponse(response, year, section):
+    decoded = response.content.decode("utf-8")
 
-    for line in splitLines:
-        if target in line:
-            foundTarget = True
+    reader = csv.reader(decoded.splitlines(), delimiter=",")
 
-        if foundTarget:
-            if linesToGrab > 0:
-                caughtLines.append(line)
-                linesToGrab -= 1
-            else:
-                break
+    rows = list(reader)
 
-    return caughtLines
-
-def sanitizeLines(caughtLines):
-    textToStrip = [
-        "<td valign=\"top\" class=\"rpt127\">",
-        "</td>",
-        "<td valign=\"top\" class=\"rpt127r\">",
-        "</tr>",
-        "<tr>",
-        "&nbsp;"
-    ]
-
-    sanitizedLine = ""
-
-    for line in caughtLines:
-        strippedLine = line.strip()
-
-        clearedLine = strippedLine
-
-        for oneTextToStrip in textToStrip:
-            clearedLine = clearedLine.replace(oneTextToStrip, "")
-
-        if clearedLine != "":
-            sanitizedLine += " " + clearedLine
-
-    return sanitizedLine
-
-
-def processLines(lines, year, target, linesToGrab):
-    
-    caughtLines = catchLines(lines, target, linesToGrab)
-    if len(caughtLines) > 0:
-        sanitizedLine = sanitizeLines(caughtLines)
-        print("{}: {}".format(year, sanitizedLine))
-    else:
-        print("{}: Did not find {}".format(year, target))
+    for row in rows:
+        print(row)
 
 config = CatsConfig()
 
@@ -78,6 +36,6 @@ for currentYear in range(config.StartYear, config.EndYear + 1):
     r = session.post(postRequestUrl, headers=headers, data=payload)
 
     if r.status_code == requests.codes.ok:
-        processLines(r.text, currentYear, config.Section, int(config.LinesToGrab))
+        processResponse(r, currentYear, config.Section)
     else:
         print("Status code \"{}\"!".format(r.status_code))
