@@ -3,6 +3,21 @@ import collections
 import csv
 from CatsConfig import CatsConfig
 
+def createCsv(airport, dataHeaders, orderedStatsByYear):
+    filename = str(airport) + ".csv"
+
+    with open(filename, "w", newline="") as csvfile:
+        writer = csv.writer(
+            csvfile,
+            delimiter=",",
+            quotechar="|",
+            quoting=csv.QUOTE_MINIMAL)
+        
+        writer.writerow(["Years"] + dataHeaders)
+        
+        for year, data in orderedStatsByYear.items():
+            writer.writerow([year] + data)
+
 def processResponse(response, year, section):
     decoded = response.content.decode("utf-8")
 
@@ -59,14 +74,6 @@ for currentYear in range(config.StartYear, config.EndYear + 1):
     else:
         print("Status code \"{}\"!".format(r.status_code))
 
-print("Years:")
-for year in statsByYear:
-    print("\t{}".format(year))
-
 orderedDict = collections.OrderedDict(sorted(statsByYear.items()))
 
-print("Data:")
-for index in range(0, len(headers)):
-    print("\t{}".format(headers[index]))
-    for year, stats in orderedDict.items():
-        print("\t\t{}: {}".format(year, stats[index]))
+createCsv(config.AirportId, headers, orderedDict)
