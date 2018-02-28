@@ -9,8 +9,20 @@ def processResponse(response, year, section):
 
     rows = list(reader)
 
-    for row in rows:
-        print(row)
+    if len(rows) == 4:
+        title = rows[0]
+        retrievalTime = rows[1]
+        headers = rows[2]
+        data = rows[3]
+
+        dictionary = dict(zip(headers, data))
+
+        return dictionary
+
+    else:
+        print("Year {} was not found.".format(year))
+
+
 
 config = CatsConfig()
 
