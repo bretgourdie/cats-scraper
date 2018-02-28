@@ -1,4 +1,5 @@
 import requests
+import collections
 import csv
 from CatsConfig import CatsConfig
 
@@ -15,18 +16,20 @@ def processResponse(response, year, section):
         headers = rows[2]
         data = rows[3]
 
-        dictionary = dict(zip(headers, data))
-
-        return dictionary
+        return headers, data
 
     else:
         print("Year {} was not found.".format(year))
+        return None, None
 
 
 
 config = CatsConfig()
 
 debug = False
+
+statsByYear = {}
+statsHeaders = []
 
 for currentYear in range(config.StartYear, config.EndYear + 1):
     postRequestUrl = "https://cats.airports.faa.gov/Reports/rpt127.cfm"
@@ -48,6 +51,22 @@ for currentYear in range(config.StartYear, config.EndYear + 1):
     r = session.post(postRequestUrl, headers=headers, data=payload)
 
     if r.status_code == requests.codes.ok:
-        processResponse(r, currentYear, config.Section)
+        headers, data = processResponse(r, currentYear, config.Section)
+
+        if headers != None and data != None:
+            statsHeaders = headers
+            statsByYear[currentYear] = data
     else:
         print("Status code \"{}\"!".format(r.status_code))
+
+print("Years:")
+for year in statsByYear:
+    print("\t{}".format(year))
+
+orderedDict = collections.OrderedDict(sorted(statsByYear.items()))
+
+print("Data:")
+for index in range(0, len(headers)):
+    print("\t{}".format(headers[index]))
+    for year, stats in orderedDict.items():
+        print("\t\t{}: {}".format(year, stats[index]))
