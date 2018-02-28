@@ -2,7 +2,6 @@ import requests
 import collections
 import csv
 from CatsConfig import CatsConfig
-import json
 
 def createCsv(dataHeaders, dataByYearsByAirport):
     filename = "cats_data.csv"
