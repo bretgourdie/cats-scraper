@@ -2,9 +2,10 @@ import requests
 import collections
 import csv
 from CatsConfig import CatsConfig
+import json
 
-def createCsv(airport, dataHeaders, orderedStatsByYear):
-    filename = str(airport) + ".csv"
+def createCsv(dataHeaders, dataByYearsByAirport):
+    filename = "cats_data.csv"
 
     with open(filename, "w", newline="") as csvfile:
         writer = csv.writer(
@@ -14,11 +15,14 @@ def createCsv(airport, dataHeaders, orderedStatsByYear):
             quoting=csv.QUOTE_MINIMAL)
         
         writer.writerow(["Years"] + dataHeaders)
-        
-        for year, data in orderedStatsByYear.items():
-            writer.writerow([year] + data)
 
-def processResponse(response, year, section):
+        for airport, statsByYear in dataByYearsByAirport.items():
+            orderedStatsByYear = collections.OrderedDict(sorted(statsByYear.items()))
+            for year, data in orderedStatsByYear.items():
+
+                writer.writerow([year] + data)
+
+def processResponse(response, year, airport):
     decoded = response.content.decode("utf-8")
 
     reader = csv.reader(decoded.splitlines(), delimiter=",")
@@ -34,7 +38,7 @@ def processResponse(response, year, section):
         return headers, data
 
     else:
-        print("Year {} was not found.".format(year))
+        print("Year {} was not found for airport {}.".format(year, airport))
         return None, None
 
 
@@ -43,37 +47,44 @@ config = CatsConfig()
 
 debug = False
 
-statsByYear = {}
+yearsByAirport = {}
+
 statsHeaders = []
 
-for currentYear in range(config.StartYear, config.EndYear + 1):
-    postRequestUrl = "https://cats.airports.faa.gov/Reports/rpt127.cfm"
-    headers = {"User-Agent": "Mozilla/5.0"}
-    payload = {
-        "AirportName": str(config.AirportId),
-        "AirportId": str(config.AirportId),
-        "State": str(config.State),
-        "RegionId": str(config.RegionId),
-        "Year": str(currentYear),
-        "view": config.view,
-        "YearToCompare": str(config.YearToCompare)
-    }
+airports = config.AirportId.split(",")
 
-    if debug:
-        print("DEBUG: Posting \"{}\" with payload \"{}\"".format(postRequestUrl, payload))
+for airport in airports:
 
-    session = requests.Session()
-    r = session.post(postRequestUrl, headers=headers, data=payload)
+    statsByYear = {}
 
-    if r.status_code == requests.codes.ok:
-        headers, data = processResponse(r, currentYear, config.Section)
+    for currentYear in range(config.StartYear, config.EndYear + 1):
+        postRequestUrl = "https://cats.airports.faa.gov/Reports/rpt127.cfm"
+        headers = {"User-Agent": "Mozilla/5.0"}
+        payload = {
+            "AirportName": str(airport),
+            "AirportId": str(airport),
+            "State": str(config.State),
+            "RegionId": str(config.RegionId),
+            "Year": str(currentYear),
+            "view": config.view,
+            "YearToCompare": str(config.YearToCompare)
+        }
 
-        if headers != None and data != None:
-            statsHeaders = headers
-            statsByYear[currentYear] = data
-    else:
-        print("Status code \"{}\"!".format(r.status_code))
+        if debug:
+            print("DEBUG: Posting \"{}\" with payload \"{}\"".format(postRequestUrl, payload))
 
-orderedDict = collections.OrderedDict(sorted(statsByYear.items()))
+        session = requests.Session()
+        r = session.post(postRequestUrl, headers=headers, data=payload)
 
-createCsv(config.AirportId, headers, orderedDict)
+        if r.status_code == requests.codes.ok:
+            headers, data = processResponse(r, currentYear, airport)
+
+            if headers != None and data != None:
+                statsHeaders = headers
+                statsByYear[currentYear] = data
+        else:
+            print("Status code \"{}\"!".format(r.status_code))
+
+    yearsByAirport[airport] = statsByYear
+
+createCsv(headers, yearsByAirport)
